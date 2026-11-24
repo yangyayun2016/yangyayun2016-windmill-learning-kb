@@ -16,6 +16,7 @@
 | [06-cheatsheet.md](./06-cheatsheet.md) | 以上所有页面；命令部分另见 [CLI flow](https://www.windmill.dev/docs/advanced/cli/flow)、[Scheduling](https://www.windmill.dev/docs/core_concepts/scheduling)、[Roles and permissions](https://www.windmill.dev/docs/core_concepts/roles_and_permissions) | 一页速查 |
 | [07-practice-checklist.md](./07-practice-checklist.md) | [Flows quickstart](https://www.windmill.dev/docs/getting_started/flows_quickstart)、[Architecture](https://www.windmill.dev/docs/flows/architecture)、[Editor components](https://www.windmill.dev/docs/flows/editor_components)、[Branches](https://www.windmill.dev/docs/flows/flow_branches)、[For loops](https://www.windmill.dev/docs/flows/flow_loops)、[Retries](https://www.windmill.dev/docs/flows/retries)、[Error handler](https://www.windmill.dev/docs/flows/flow_error_handler)、[Approval](https://www.windmill.dev/docs/flows/flow_approval)、[Scheduling](https://www.windmill.dev/docs/core_concepts/scheduling)、[Webhooks](https://www.windmill.dev/docs/core_concepts/webhooks)、[Workflows as code](https://www.windmill.dev/docs/core_concepts/workflows_as_code) | 动手练习 |
 | [BOT.md](./BOT.md) | 以上所有页面 | Bot 人设、边界、引用规范 |
+| [tianji-ai-amazon-product-dev/](./tianji-ai-amazon-product-dev/README.md) | 无单一官方页。Flow 概念仍对照本表前面的官方文档；步骤、提示词、耗时和报错对照该目录里的 OpenFlow、脚本和运行结果 | 天机 AI 亚马逊产品开发 v186181 实战 |
 
 ## 按主题
 
@@ -80,6 +81,24 @@
 - Flow as chat：<https://www.windmill.dev/docs/flows/flow_as_chat>
 - Sticky notes：<https://www.windmill.dev/docs/flows/sticky_notes>
 - Hub：<https://hub.windmill.dev>
+
+## 实战专题（不是官方文档快照）
+
+`tianji-ai-amazon-product-dev/` 的事实来源是工作室自己的导出和运行结果，不是 `sources/` 里的官方页面。引用 Windmill 的一般行为（Flow、`results`、Resource、CLI）时，仍回到上表的官方 URL。
+
+| 文件 | 来源 |
+| --- | --- |
+| `tianji-ai-amazon-product-dev/flow/amazon_product_development.v186181.flow.json` | Windmill Cloud workspace `tianjikuajing-yayun` 上 `u/tianjikuajingyayun/amazon_product_development` 的部署版本 `v186181` |
+| `tianji-ai-amazon-product-dev/scripts/collect_market.ts` | 脚本 `u/tianjikuajingyayun/collect_market` |
+| `tianji-ai-amazon-product-dev/scripts/cross_validate.ts` | 脚本 `u/tianjikuajingyayun/cross_validate` |
+| `tianji-ai-amazon-product-dev/examples/run-01a1f7d5-result.json` | `dog mats` / 美国站这次运行的最终结果，即 `s12_review` 的 Result |
+| `tianji-ai-amazon-product-dev/assets/20-flow-success.png` | 续跑段 5 分 58 秒、状态 100% 的运行页截图 |
+| `01`～`05` 与专题 `README.md` | 根据以上文件整理。版本演进（`v180115` 至 `v186181`）写在 `03-troubleshooting-and-evolution.md`，那些中间版本没有单独导出 |
+
+DeepSeek thinking 回传问题的公开记录（与第 6 次排错对照，不是本仓库的运行日志）：
+
+- <https://github.com/windmill-labs/windmill/issues/9192>
+- <https://github.com/windmill-labs/windmill/pull/9208>
 
 ## sources 目录说明（与 repo/ 同级）
 
