@@ -50,6 +50,8 @@ const SS = "u/你的用户名/sellersprite_mcp";
 
 `cross_validate.ts` 没有资源路径，不用改。
 
+这两个文件与 v186181 逐字一致。月末月份溢出、分桶被当成点、未抽样 coupon 被写成「无优惠」、`top_n` 按变体行截断，都写在 [01-windmill-architecture-and-design.md](./01-windmill-architecture-and-design.md) 第 9 节。要改这些行为，改你部署的副本，不要改本仓库里的导出。MCP Resource 的 `url` 用 `https`。
+
 两个脚本都依赖 `windmill-client` 的运行时（采集脚本的 `import * as wmill from "windmill-client"`）。在 Windmill 脚本编辑器里新建 TypeScript，把源码贴进去再部署即可。用 CLI 时，按速查表的 `wmill script push`，路径写成你的 `u/你的用户名/...`。
 
 先单独跑 `collect_market`：`keyword` 用一个你有额度的词，`marketplace` 用 `US`，`top_n` 先用 `3`，`with_coupon` 可以先 `false`，少打 5 次 coupon。返回里应有 `listings`、`diagnostics`、`source_policy`，且没有 `token` 字段。再把这份返回喂给 `cross_validate` 的 `market` 参数，确认有 `adopted`、`verification`、`market_summary`。

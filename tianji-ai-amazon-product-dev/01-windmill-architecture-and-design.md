@@ -279,3 +279,23 @@ AI 步骤的 `usage`（例如 `s12` 的 9886 total tokens）是模型 token，�
 - 彻底修复是 Windmill worker 在多轮工具调用里把上一轮 `reasoning_content` 序列化回去。在那之前，带工具的 DeepSeek 节点应统一设为 `reasoning_effort: "none"`。
 
 细节和 issue / PR 链接见 [03-troubleshooting-and-evolution.md](./03-troubleshooting-and-evolution.md)。
+
+## 9. 导出源码里的行为边界
+
+`scripts/` 和 `flow/` 与 v186181 的导出逐字一致，用来对照这次跑通的结果。下面这些行为都在这份源码里，复制到自己的 workspace 之后可以改自己的副本。本仓库不把它们改回脚本，否则就不再是当时跑通的那一版。
+
+**月份在月末会溢回本月。** `pickLatestMonth` 的注释是取 UTC 今天的上一个月，实现是 `setUTCMonth(getUTCMonth() - 1)`，参数 `items` 没有被读取。当天的 UTC 日大于上一个月的天数时，JavaScript 会把日期溢回本月。用同一段逻辑核对：UTC `2026-03-30` 得到 `202603`，UTC `2026-05-31` 得到 `202605`；UTC `2026-03-01` 得到 `202602`，UTC `2026-01-31` 得到 `202512`。自己的副本里可以先把日期拨到 1 号再减月，例如 `setUTCMonth(d.getUTCMonth() - 1, 1)`。
+
+**分桶边界被当成一个点去比。** `parseUnits` 把 `3,000+` 收成数值 3000，并标 `is_bucket`。`cross_validate` 用这个点和卖家精灵月销量算 `(SIF − 卖家精灵) / 卖家精灵`。绝对值大于 40 就覆盖成 verdict `"低"`，即使卖家精灵的销量仍落在这个开区间里。`dog mats` 的告警里有 `SIF 销量为分桶值(3,000+)` 和 `销量跨源偏差 -85.51%`：按这个百分比反推，卖家精灵大约是 2 万件量级，`3,000+` 并没有排除它。告警文本同时保留了分桶原文，读 verdict 时要和这条 flag 一起看。
+
+**没抽到的 coupon 会变成「没有优惠」。** coupon 只请求前 5 个 ASIN。其余行的 `coupon` 是 `null`。`finalPrice` 在原始 coupon 为空时返回成交价等于标价、`coupon_type: "none"`、`coupon_value: 0`。`adopted.coupon.trend_points` 用 `?? 0`。下游看到的是「查过、没有优惠」，和「这行根本没请求」是同一份结构。只有 `coupon.error` 有值时，flags 才会写 `coupon 取数失败`。
+
+**MCP 的 `result.isError` 不会进 catch。** `Session.call` 只在 JSON-RPC 的 `error` 字段上抛错。工具结果如果走 MCP 的 `result.isError`，正文仍会当数据返回。coupon 循环因此不一定走到 `couponMap[a] = { asin, error }`。
+
+**`top_n` 限制的是一页变体行，不是去重后的父体数。** `product_research` 的 `size` 等于夹紧后的 `top_n`，`variation` 为 `"Y"`，只请求第 1 页。验证层再按父 ASIN 去重，不去补下一页。schema 写的是「采样父体数量」；一页里同一父体有多行时，`market_summary` 里的父体数会少于 `top_n`。
+
+**ASIN 只抽取 `B0` 加 8 位。** `cleanAsin` 用这段子串匹配。抽不到的 listing 仍保留卖家精灵销售额，但不会进入 SIF 销量请求，也不会成为 coupon 目标。文件顶部的 `ASIN_RE` 没有被调用。
+
+**`moq` 和 `target_price` 不会被脚本拦住。** schema 的 `required` 只有 `keyword`。`target_price` 没有默认值；只填关键词时，`s08` 仍会把 `flow_input.target_price` 放进提示词。`moq` 默认 1000，说明是「首单与开模起订量」，`s10` 会收到它。`s11` 的提示词要求输出首单数量，没有写「不得低于 moq」。`dog mats` 这次复盘里的首单计划值是 300，输入里的 `moq` 是 1000。
+
+**MCP 的 URL 协议没有检查。** `conn` 只要求资源里有 `url`。`token` 会放进 `Authorization: Bearer`。Resource 请填 `https` 地址。
