@@ -1,6 +1,6 @@
 # SOURCE_MAP · 笔记与官方文档对应表
 
-所有链接均在 2026-11-20 抓取，HTTP 状态见与 `repo/` 同级的 `STATUS.txt`。与本仓库同级的 `sources/` 下保留了抓取到的 `.md` / `.html` 原文，仅用于核对，不是知识库正文。
+除另行注明外，链接均在 2026-11-20 抓取，HTTP 状态见与 `repo/` 同级的 `STATUS.txt`。与本仓库同级的 `sources/` 下保留了抓取到的 `.md` / `.html` 原文，仅用于核对，不是知识库正文。
 
 ## 总览
 
@@ -15,6 +15,7 @@
 | [05-workflows-as-code.md](./05-workflows-as-code.md) | [Workflows as code](https://www.windmill.dev/docs/core_concepts/workflows_as_code)、[Git sync](https://www.windmill.dev/docs/advanced/git_sync)、[CLI flow](https://www.windmill.dev/docs/advanced/cli/flow)、[Approval](https://www.windmill.dev/docs/flows/flow_approval)、[Retries](https://www.windmill.dev/docs/flows/retries) | WAC 写法、同步、选型 |
 | [06-cheatsheet.md](./06-cheatsheet.md) | 以上所有页面；命令部分另见 [CLI flow](https://www.windmill.dev/docs/advanced/cli/flow)、[Scheduling](https://www.windmill.dev/docs/core_concepts/scheduling)、[Roles and permissions](https://www.windmill.dev/docs/core_concepts/roles_and_permissions) | 一页速查 |
 | [07-practice-checklist.md](./07-practice-checklist.md) | [Flows quickstart](https://www.windmill.dev/docs/getting_started/flows_quickstart)、[Architecture](https://www.windmill.dev/docs/flows/architecture)、[Editor components](https://www.windmill.dev/docs/flows/editor_components)、[Branches](https://www.windmill.dev/docs/flows/flow_branches)、[For loops](https://www.windmill.dev/docs/flows/flow_loops)、[Retries](https://www.windmill.dev/docs/flows/retries)、[Error handler](https://www.windmill.dev/docs/flows/flow_error_handler)、[Approval](https://www.windmill.dev/docs/flows/flow_approval)、[Scheduling](https://www.windmill.dev/docs/core_concepts/scheduling)、[Webhooks](https://www.windmill.dev/docs/core_concepts/webhooks)、[Workflows as code](https://www.windmill.dev/docs/core_concepts/workflows_as_code) | 动手练习 |
+| [08-self-host-architecture.md](./08-self-host-architecture.md) | [Self-host / Architecture](https://www.windmill.dev/docs/advanced/self_host#architecture)（2026-11-24 核对）、[Worker groups](https://www.windmill.dev/docs/core_concepts/worker_groups)、[Code editor](https://www.windmill.dev/docs/code_editor)、[Multiplayer](https://www.windmill.dev/docs/core_concepts/multiplayer) | 自托管的三个必需组件和三个可选组件 |
 | [BOT.md](./BOT.md) | 以上所有页面 | Bot 人设、边界、引用规范 |
 
 ## 按主题
@@ -71,6 +72,11 @@
 - 自动生成 UI：<https://www.windmill.dev/docs/core_concepts/auto_generated_uis>
 - JSON schema：<https://www.windmill.dev/docs/core_concepts/json_schema_and_parsing>
 - Preprocessors：<https://www.windmill.dev/docs/core_concepts/preprocessors>
+
+### 自托管
+
+- 架构（本篇只整理这一节）：<https://www.windmill.dev/docs/advanced/self_host#architecture>
+- Worker groups：<https://www.windmill.dev/docs/core_concepts/worker_groups>
 
 ### 其他
 

@@ -18,10 +18,11 @@
 - 测试、部署、版本、权限、Worker group、Shared Directory。
 - Workflows as Code 的写法、原语、确定性、同步与选型。
 - Flow 与 Script / App / Resource 的边界。
+- 自托管实例由哪些组件组成：Postgres、server、worker，以及可选的 LSP、Multiplayer、反向代理。详见 `08-self-host-architecture.md`。
 
 **不深入回答（可以一句话带过并给官方链接）：**
 
-- Windmill 自托管部署、Kubernetes、Helm 细节。
+- Windmill 自托管的安装命令、Kubernetes、Helm、云厂商配置。架构组件本身按 `08-self-host-architecture.md` 回答。
 - 具体第三方 API 的鉴权/字段（Slack、Stripe、Snowflake 等）。
 - 前端 App 组件细节、React/Svelte 开发。
 - 计费、套餐、发票、账号删除。

@@ -4,7 +4,7 @@
 
 - 建议 GitHub 仓库名：`windmill-learning-kb`
 - 中文名：Windmill 学习知识库
-- 笔记基于 2026-11-20 抓取的官方文档整理，官方更新后请以原文为准。
+- 笔记基于 2026-11-20 抓取的官方文档整理；自托管架构一篇于 2026-11-24 核对。官方更新后请以原文为准。
 
 ## 这个知识库解决什么问题
 
@@ -28,6 +28,7 @@
 | 6 | [05-workflows-as-code.md](./05-workflows-as-code.md) | 用 TypeScript / Python 写工作流，以及与可视化 Flow 的对照 |
 | 7 | [06-cheatsheet.md](./06-cheatsheet.md) | 一页速查：概念、命令、路径、链接 |
 | 8 | [07-practice-checklist.md](./07-practice-checklist.md) | 由浅入深的动手练习清单 |
+| 9 | [08-self-host-architecture.md](./08-self-host-architecture.md) | 自托管实例的必需组件与可选组件 |
 | — | [BOT.md](./BOT.md) | 「Windmill Flow 快速学习 Bot」的人设与使用说明 |
 | — | [SOURCE_MAP.md](./SOURCE_MAP.md) | 每篇笔记对应的官方文档 URL |
 
@@ -38,6 +39,7 @@
 - Flow 编辑器：<https://www.windmill.dev/docs/flows/flow_editor>
 - 调度：<https://www.windmill.dev/docs/core_concepts/scheduling>
 - OpenFlow 规范：<https://www.windmill.dev/docs/openflow>
+- 自托管架构：<https://www.windmill.dev/docs/advanced/self_host#architecture>
 - Windmill Hub（可 fork 的 Flow / Script 示例）：<https://hub.windmill.dev>
 
 ## 阅读约定

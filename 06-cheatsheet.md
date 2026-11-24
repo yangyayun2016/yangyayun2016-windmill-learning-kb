@@ -19,6 +19,8 @@
 | Draft / Deploy | 用户级草稿 / 生产版本 |
 | OpenFlow | Flow 的开放定义格式（JSON/YAML） |
 | WAC | Workflows as Code，用 TS/Python 写编排 |
+| 自托管三件套 | Postgres（含队列与全部状态）、server 容器、worker 容器；后两者不直连 |
+| LSP / Multiplayer / 反代 | 自托管的三个可选组件；Multiplayer 仅 Cloud 与 Enterprise 自托管 |
 
 ## 步骤类型
 
@@ -166,6 +168,7 @@ CLI 里 Resource / Variable 用 `$res:...` / `$var:...` 传。
 | 版本 | <https://www.windmill.dev/docs/core_concepts/versioning> |
 | CLI Flow | <https://www.windmill.dev/docs/advanced/cli/flow> |
 | OpenFlow | <https://www.windmill.dev/docs/openflow> |
+| 自托管架构 | <https://www.windmill.dev/docs/advanced/self_host#architecture> |
 | Hub | <https://hub.windmill.dev> |
 
 ## 排错一句话
