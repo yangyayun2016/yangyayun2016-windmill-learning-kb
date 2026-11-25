@@ -31,6 +31,7 @@
 | 9 | [08-self-host-architecture.md](./08-self-host-architecture.md) | 自托管实例的必需组件与可选组件 |
 | — | [BOT.md](./BOT.md) | 「Windmill Flow 快速学习 Bot」的人设与使用说明 |
 | — | [SOURCE_MAP.md](./SOURCE_MAP.md) | 每篇笔记对应的官方文档 URL |
+| — | [tianji-ai-amazon-product-dev/README.md](./tianji-ai-amazon-product-dev/README.md) | 实战：天机 AI 亚马逊产品开发 Flow（v186181）的架构、14 步、排错与可导入资产 |
 
 ## 官方入口
 
@@ -49,6 +50,14 @@
 - 示例中的路径（如 `u/your_name/...`、`f/team/...`）都是占位符，请换成你自己的 workspace 路径。
 - 本仓库不包含任何 API key、token、账号密码，也不要求你修改已有的生产 Flow。
 - 与本仓库同级的 `sources/` 只放抓取到的官方原文，供核对使用；知识库正文为原创整理。官方文档版权归 Windmill Labs。
+
+## 实战专题：天机 AI 亚马逊产品开发
+
+[tianji-ai-amazon-product-dev/](./tianji-ai-amazon-product-dev/README.md) 记录一条已经在 Windmill Cloud（workspace `tianjikuajing-yayun`）跑通的 Flow：`u/tianjikuajingyayun/amazon_product_development`，部署版本 `v186181`。
+
+它用两个 TypeScript 步骤采集并对齐 SIF 销量、卖家精灵销售额和 Keepa 口径 coupon，再用 12 个 DeepSeek AI Agent 走完从市场概览到试销复盘。实证输入是 `dog mats` / `US` / `moq=1000` / `target_margin_pct=30` / `target_price=15` / `top_n=10` / `with_coupon=true`。目录里有 OpenFlow、脚本、提示词、排错记录（`v180115` 到 `v186181`）和跑通截图。
+
+这是工作室的实战笔记，不是官方文档的改写。导入前阅读复现指南，把 `u/tianjikuajingyayun/...` 换成你自己的路径；密钥只放在 Resource 里。
 
 ## 适合谁
 

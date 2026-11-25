@@ -1,0 +1,1098 @@
+{
+  "summary": "天机AI选品：12 步亚马逊产品开发编排（SIF 销量 / 卖家精灵销售额 / Keepa 口径 coupon + 交叉验证）",
+  "description": "天机AI选品 12 步编排。数据源分工固定：销量=SIF、销售额=卖家精灵、coupon/优惠=Keepa 口径。",
+  "value": {
+    "modules": [
+      {
+        "id": "collect",
+        "value": {
+          "path": "u/tianjikuajingyayun/collect_market",
+          "type": "script",
+          "input_transforms": {
+            "top_n": {
+              "expr": "flow_input.top_n",
+              "type": "javascript"
+            },
+            "keyword": {
+              "expr": "flow_input.keyword",
+              "type": "javascript"
+            },
+            "marketplace": {
+              "expr": "flow_input.marketplace",
+              "type": "javascript"
+            },
+            "with_coupon": {
+              "expr": "flow_input.with_coupon",
+              "type": "javascript"
+            },
+            "node_id_path": {
+              "type": "static",
+              "value": ""
+            }
+          }
+        },
+        "summary": "采集：SIF 销量 + 卖家精灵销售额 + Keepa 口径 coupon"
+      },
+      {
+        "id": "validate",
+        "value": {
+          "path": "u/tianjikuajingyayun/cross_validate",
+          "type": "script",
+          "input_transforms": {
+            "market": {
+              "expr": "results.collect",
+              "type": "javascript"
+            }
+          }
+        },
+        "summary": "交叉验证：三方口径对齐、算偏差、定采信值"
+      },
+      {
+        "id": "s01_overview",
+        "value": {
+          "type": "aiagent",
+          "tools": [
+            {
+              "id": "t_ss_s01",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "market_research_statistics",
+                  "market_brand_concentration",
+                  "market_product_concentration",
+                  "product_research"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sellersprite_mcp"
+              },
+              "summary": "卖家精灵",
+              "description": "类目结构与集中度数据"
+            },
+            {
+              "id": "t_sif_s01",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "query_quota",
+                  "market_get_keyword_root_competitors",
+                  "ops_get_asin_sales_list"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sif_mcp"
+              },
+              "summary": "SIF",
+              "description": "销量与竞争格局"
+            }
+          ],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek",
+                "reasoning_effort": "high"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'概览',输入:flow_input,市场汇总:results.validate.market_summary,可信度:results.validate.verification.summary,采信明细:results.validate.adopted})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是亚马逊选品分析师，输出概览阶段结论。返回 JSON：结论(进入/观察/放弃)、一句话判断、市场规模{月销售额,销售额来源,三十天销量合计,销量来源,价格中位数,样本数}、竞争格局{头部五名收益占比,中国卖家占比,平均毛利率,平均评分,解读}、机会点[]、风险点[]、数据可信度(高/中/低)。只使用给定数据，缺数字写数据不足，绝不编造；销量必标 SIF，销售额必标卖家精灵。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 6
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "①概览",
+        "continue_on_error": false
+      },
+      {
+        "id": "s02_segments",
+        "value": {
+          "type": "aiagent",
+          "tools": [
+            {
+              "id": "t_ss_s02",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "market_price_distribution",
+                  "market_rating_distribution",
+                  "market_ratings_count_distribution",
+                  "market_listing_date_distribution",
+                  "market_seller_country_distribution",
+                  "market_ebc_distribution",
+                  "market_brand_concentration",
+                  "market_product_concentration",
+                  "market_research_statistics",
+                  "market_product_demand_trend",
+                  "product_node",
+                  "product_research"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sellersprite_mcp"
+              },
+              "summary": "卖家精灵",
+              "description": "市场分布与集中度工具"
+            }
+          ],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'细分市场',输入:flow_input,市场汇总:results.validate.market_summary,类目节点:results.validate.market_summary.node_id_path,概览:results.s01_overview.output})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是类目结构分析师，输出细分市场。返回 JSON：细分市场[]{名称,月销售额,销量,价格带,集中度,评分门槛,进入难度(低/中/高),机会评级(强/中/弱),选择理由}、推荐主攻细分。用卖家精灵的市场分布与集中度工具把市场拆成 3-6 个可独立进入的细分，每个都要带量化依据，不是罗列类目名。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 10
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "②细分市场"
+      },
+      {
+        "id": "s03_benchmark",
+        "value": {
+          "type": "aiagent",
+          "tools": [
+            {
+              "id": "t_sif_s03",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "market_get_keyword_root_competitors",
+                  "market_discover_competitors",
+                  "market_get_asin_profile",
+                  "ops_get_asin_sales_list",
+                  "query_quota"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sif_mcp"
+              },
+              "summary": "SIF",
+              "description": "ASIN 画像与竞品发现"
+            },
+            {
+              "id": "t_ss_s03",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "asin_detail",
+                  "asin_competitor",
+                  "competitor_lookup",
+                  "product_research",
+                  "review",
+                  "asin_detail_with_coupon_trend"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sellersprite_mcp"
+              },
+              "summary": "卖家精灵",
+              "description": "竞品与详情"
+            }
+          ],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'对标与元素',输入:flow_input,主攻细分:results.s02_segments.output,采集竞品池:results.validate.competitors,采信明细:results.validate.adopted})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是竞品拆解专家，输出对标与元素。返回 JSON，键：对标ASIN（数组，每项含 asin,品牌,价格,月销量,月销售额,评分,评分数,核心卖点句数组,内容配置,优惠打法,为什么对标）、可复用元素（字符串数组）、差异化空位（字符串数组）。锁定 3-5 个对标 ASIN，优先主攻细分的头部与高增长款；竞品发现先走 SIF 竞品发现工具做概览再深挖。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 12
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "③对标与元素"
+      },
+      {
+        "id": "s04_attr_matrix",
+        "value": {
+          "type": "aiagent",
+          "tools": [
+            {
+              "id": "t_ss_s04",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "product_research",
+                  "asin_detail",
+                  "asin_competitor",
+                  "market_price_distribution",
+                  "market_rating_distribution"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sellersprite_mcp"
+              },
+              "summary": "卖家精灵",
+              "description": "属性、变体与分布数据"
+            },
+            {
+              "id": "t_sif_s04",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "market_get_asin_profile"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sif_mcp"
+              },
+              "summary": "SIF",
+              "description": "ASIN 基础属性与变体"
+            }
+          ],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'属性矩阵',输入:flow_input,对标:results.s03_benchmark.output,采信明细:results.validate.adopted,竞品池:results.validate.competitors})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是产品属性分析师，输出属性矩阵。返回 JSON，键：属性（数组，每项含 属性名、取值分布（数组，每项含 取值,商品数占比,销量占比,平均评分）、启示）、被低估的取值（字符串数组）、必备门槛取值（字符串数组）。回答哪些取值组合被市场认可、哪些被低估（有销量但评分低即改进机会）。属性要能落到产品定义与开模：尺寸、厚度、材质、结构、配件、颜色、包装形态。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 10
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "④属性矩阵"
+      },
+      {
+        "id": "s05_death_modes",
+        "value": {
+          "type": "aiagent",
+          "tools": [
+            {
+              "id": "t_ss_s05",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "review",
+                  "asin_detail",
+                  "competitor_lookup"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sellersprite_mcp"
+              },
+              "summary": "卖家精灵",
+              "description": "评论与详情"
+            }
+          ],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek",
+                "reasoning_effort": "none"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'差评死法',输入:flow_input,对标:results.s03_benchmark.output,属性:results.s04_attr_matrix.output})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是质量与结构工程师，输出差评死法。返回 JSON，键：死法（数组，每项含 死法,典型差评原句,差评来源asin,出现频次,使用场景,涉及部件,失效机理,可规避方案,严重度）、结构风险清单（字符串数组）、评论数据说明。用卖家精灵 review 工具拉对标 ASIN 的 1-3 星差评归纳。铁律：差评原句必须来自工具返回，禁止编造；拿不到就写评论数据不足。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 12
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "⑤差评死法"
+      },
+      {
+        "id": "s06_gap_matrix",
+        "value": {
+          "type": "aiagent",
+          "tools": [],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek",
+                "reasoning_effort": "none"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'差距矩阵',输入:flow_input,概览:results.s01_overview.output,细分:results.s02_segments.output,对标:results.s03_benchmark.output,属性:results.s04_attr_matrix.output,死法:results.s05_death_modes.output})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是产品经理，输出差距矩阵。返回 JSON，键：差距（数组，每项含 维度,头部水平,我方现状或目标,差距,是否必须补齐（布尔）,补齐成本等级）、核心结论。把前五个阶段的结论压成结构化取舍，不要重新发明数据。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 4
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "⑥差距矩阵"
+      },
+      {
+        "id": "s07_upgrade_plan",
+        "value": {
+          "type": "aiagent",
+          "tools": [],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek",
+                "reasoning_effort": "none"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'升级方案',输入:flow_input,差距矩阵:results.s06_gap_matrix.output,死法:results.s05_death_modes.output,属性矩阵:results.s04_attr_matrix.output,市场汇总:results.validate.market_summary})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是产品定义负责人，输出升级方案。返回 JSON，键：升级点（数组，每项含 升级项,解决什么,实现方式,成本增量,预期效果,优先级）、产品定义一句话。针对差距矩阵里必须补齐的项与高危死法，给可执行方案（结构/材料/工艺/配件）；升级点要能直接进 BOM。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 4
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "⑦升级方案"
+      },
+      {
+        "id": "s08_cost_packaging",
+        "value": {
+          "type": "aiagent",
+          "tools": [
+            {
+              "id": "t_sif_s08",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "market_estimate_profit_threshold",
+                  "market_assess_keyword_promotion",
+                  "query_quota"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sif_mcp"
+              },
+              "summary": "SIF",
+              "description": "采购成本上限反推与推广可行性"
+            },
+            {
+              "id": "t_ss_s08",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "asin_detail",
+                  "product_research",
+                  "asin_detail_with_coupon_trend"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sellersprite_mcp"
+              },
+              "summary": "卖家精灵",
+              "description": "FBA 费、尺寸重量、价格与优惠"
+            }
+          ],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek",
+                "reasoning_effort": "none"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'成本与包装',输入:flow_input,目标售价:flow_input.target_price,目标毛利率_pct:flow_input.target_margin_pct,升级方案:results.s07_upgrade_plan.output,采信明细:results.validate.adopted,市场汇总:results.validate.market_summary})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是成本与包装工程师，输出成本与包装。返回 JSON，键：成本结构（对象：售价,平台佣金,FBA配送费,头程运费,包装成本,采购成本上限,毛利率,计算说明）、包装方案（对象：形态,尺寸,重量,材质,尺寸重量优化点,对FBA费影响）、数据来源说明（字符串数组）。用 SIF 的采购成本上限反推工具做核心测算，结合卖家精灵的 FBA 费、尺寸重量、毛利率。每个数字必须说明来源（工具返回或计算式），估算值标注估算。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 10
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "⑧成本与包装"
+      },
+      {
+        "id": "s09_hypothesis_cards",
+        "value": {
+          "type": "aiagent",
+          "tools": [],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek",
+                "reasoning_effort": "none"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'假设卡',输入:flow_input,概览:results.s01_overview.output,升级方案:results.s07_upgrade_plan.output,成本:results.s08_cost_packaging.output,差距:results.s06_gap_matrix.output})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是精益产品经理，输出假设卡。返回 JSON，键：假设（数组，每项含 编号,假设内容,验证方式,验证指标,通过阈值,最晚验证时间,不通过时动作,关联升级项）、最高风险假设。把前面所有还没被验证的关键判断写成可执行可证伪的假设卡，不许写大概会好卖这种。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 4
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "⑨假设卡"
+      },
+      {
+        "id": "s10_bom",
+        "value": {
+          "type": "aiagent",
+          "tools": [
+            {
+              "id": "t_ss_s10",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "asin_detail",
+                  "product_research"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sellersprite_mcp"
+              },
+              "summary": "卖家精灵",
+              "description": "尺寸重量与 FBA 费参考"
+            }
+          ],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek",
+                "reasoning_effort": "none"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'开模BOM表',输入:flow_input,MOQ:flow_input.moq,产品定义:results.s07_upgrade_plan.output,属性矩阵:results.s04_attr_matrix.output,成本:results.s08_cost_packaging.output,结构风险:results.s05_death_modes.output})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是结构工程师兼采购，输出开模 BOM。返回 JSON，键：结构件（数组，每项含 件号,名称,材质,工艺,尺寸,数量,单件成本_CNY,成本依据,模具类型,模具费_CNY,开模周期_天）、总开模费_CNY、总BOM成本_CNY、关键公差（字符串数组）、开模风险（字符串数组）、需询价项（字符串数组）。金额用人民币；没有依据的单价标注需询价，不许编造精确报价。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 8
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "⑩开模BOM表"
+      },
+      {
+        "id": "s11_test_plan",
+        "value": {
+          "type": "aiagent",
+          "tools": [
+            {
+              "id": "t_sif_s11",
+              "value": {
+                "tool_type": "mcp",
+                "exclude_tools": [],
+                "include_tools": [
+                  "market_get_keyword_demand",
+                  "market_get_keyword_competition",
+                  "market_screen_keyword_opportunities",
+                  "market_assess_keyword_promotion",
+                  "market_get_keyword_root_trend",
+                  "query_quota"
+                ],
+                "resource_path": "u/tianjikuajingyayun/sif_mcp"
+              },
+              "summary": "SIF",
+              "description": "关键词需求、竞争与推广可行性"
+            }
+          ],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek",
+                "reasoning_effort": "none"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'试销计划',输入:flow_input,概览:results.s01_overview.output,对标:results.s03_benchmark.output,成本:results.s08_cost_packaging.output,假设卡:results.s09_hypothesis_cards.output,市场汇总:results.validate.market_summary})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是亚马逊运营负责人，输出试销计划。返回 JSON，键：试销目标,首单数量,定价与优惠（对象：上架价,coupon策略,折后成交价,调价节奏）,主推关键词（数组，每项含 关键词,搜索量,竞争度,预算_CNY）,上架节奏（字符串数组）,成功标准,止损线。关键词与预算要有数据依据，用 SIF 的关键词需求、竞争度、推广可行性工具。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 10
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "⑪试销计划"
+      },
+      {
+        "id": "s12_review",
+        "value": {
+          "type": "aiagent",
+          "tools": [],
+          "input_transforms": {
+            "memory": {
+              "type": "static",
+              "value": null
+            },
+            "provider": {
+              "type": "static",
+              "value": {
+                "kind": "deepseek",
+                "model": "deepseek-v4-pro",
+                "resource": "$res:u/tianjikuajingyayun/ecstatic_deepseek",
+                "reasoning_effort": "none"
+              }
+            },
+            "streaming": {
+              "type": "static",
+              "value": null
+            },
+            "output_type": {
+              "type": "static",
+              "value": "text"
+            },
+            "temperature": {
+              "type": "static",
+              "value": null
+            },
+            "user_message": {
+              "expr": "JSON.stringify({阶段:'复盘反馈',输入:flow_input,假设卡:results.s09_hypothesis_cards.output,试销计划:results.s11_test_plan.output,成本:results.s08_cost_packaging.output,数据可信度:results.validate.verification.summary,数据告警:results.validate.verification.all_flags})",
+              "type": "javascript"
+            },
+            "enabled_tools": {
+              "type": "static",
+              "value": null
+            },
+            "output_schema": {
+              "type": "static",
+              "value": null
+            },
+            "system_prompt": {
+              "type": "static",
+              "value": "你是项目复盘负责人，输出复盘反馈。返回 JSON，键：复盘维度（数组，每项含 维度,计划值,待回填实际值,判定标准）、假设卡结论（数组，每项含 编号,当前状态,说明）、需要回填上游的修正（字符串数组）、证据不足的结论（字符串数组）、下一轮迭代建议（字符串数组）。以试销计划为基准，复盘模板要能直接给团队开会用。"
+            },
+            "max_iterations": {
+              "type": "static",
+              "value": 4
+            },
+            "user_attachments": {
+              "type": "static",
+              "value": null
+            },
+            "max_completion_tokens": {
+              "type": "static",
+              "value": null
+            }
+          }
+        },
+        "summary": "⑫复盘反馈"
+      }
+    ],
+    "groups": [
+      {
+        "color": "blue",
+        "end_id": "validate",
+        "summary": "数据底座（采集 + 交叉验证）",
+        "start_id": "collect"
+      },
+      {
+        "color": "green",
+        "end_id": "s02_segments",
+        "summary": "市场判定 ①-②",
+        "start_id": "s01_overview"
+      },
+      {
+        "color": "cyan",
+        "end_id": "s04_attr_matrix",
+        "summary": "产品定义 ③-④",
+        "start_id": "s03_benchmark"
+      },
+      {
+        "color": "red",
+        "end_id": "s07_upgrade_plan",
+        "summary": "痛点与差距 ⑤-⑦",
+        "start_id": "s05_death_modes"
+      },
+      {
+        "color": "orange",
+        "end_id": "s09_hypothesis_cards",
+        "summary": "成本与假设 ⑧-⑨",
+        "start_id": "s08_cost_packaging"
+      },
+      {
+        "color": "purple",
+        "end_id": "s11_test_plan",
+        "summary": "落地 ⑩-⑪",
+        "start_id": "s10_bom"
+      },
+      {
+        "color": "gray",
+        "end_id": "s12_review",
+        "summary": "复盘 ⑫",
+        "start_id": "s12_review"
+      }
+    ]
+  },
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": [
+      "keyword"
+    ],
+    "properties": {
+      "keyword": {
+        "type": "string",
+        "description": "品类主关键词，如 yoga mat"
+      },
+      "marketplace": {
+        "type": "string",
+        "default": "US",
+        "description": "亚马逊站点：US/UK/DE/JP 等"
+      },
+      "top_n": {
+        "type": "number",
+        "default": 10,
+        "description": "采样父体数量"
+      },
+      "with_coupon": {
+        "type": "boolean",
+        "default": true,
+        "description": "是否拉 Keepa 口径 coupon 趋势"
+      },
+      "target_price": {
+        "type": "number",
+        "description": "目标售价（美元）"
+      },
+      "target_margin_pct": {
+        "type": "number",
+        "default": 30,
+        "description": "目标毛利率（%）"
+      },
+      "moq": {
+        "type": "number",
+        "default": 1000,
+        "description": "首单与开模起订量"
+      }
+    },
+    "prompt_for_ai": "ExecutionErr：执行错误：调用 https://api.deepseek.com/v1/chat/completions 时出现 API 错误：URL (https://api.deepseek.com/v1/chat/completions) 的 HTTP 状态客户端错误 (400 Bad Request) - {\"error\":{\"message\":\"此 response_format 类型目前不可用 (request_id: 66bfc2b9-9afa-492b-ab4f-657ca7c7ac6a)\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_request_error\"}}\n"
+  }
+}
